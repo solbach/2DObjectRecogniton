@@ -22,6 +22,54 @@ void sharpenImage(Mat& toSharpen)
     addWeighted(toSharpen, 3, blurImage, -2, 0, toSharpen);
 }
 
+void findFeature(Mat& descriptorObject, std::vector<KeyPoint>& keypointsObject,
+                 Mat& descriptorInput, Mat grayObject, Mat grayInput,
+                 std::vector<KeyPoint>& keypointsImage)
+{
+    int minHessian = 400;
+
+    SurfFeatureDetector detector( minHessian );
+
+    detector.detect( grayObject, keypointsObject );
+    detector.detect( grayInput, keypointsImage );
+
+    // calculate descriptor
+    SurfDescriptorExtractor extractor;
+
+    extractor.compute( grayInput, keypointsImage, descriptorInput );
+    extractor.compute( grayObject, keypointsObject, descriptorObject );
+}
+
+std::vector<DMatch> findNearestNeighbor(Mat descriptorInput,
+                                        Mat descriptorObject)
+{
+    FlannBasedMatcher matcher;
+    std::vector<DMatch> matches;
+    matcher.match( descriptorObject, descriptorInput, matches);
+
+    double maxDist = 0;
+    double minDist = 100;
+
+    for (int i = 0; i < descriptorInput.rows; ++i) {
+        double dist = matches[i].distance;
+
+        if ( dist < minDist )
+            minDist = dist;
+
+        if ( dist > maxDist )
+            maxDist = dist;
+    }
+
+    std::vector< DMatch > goodMatches;
+
+    for (int j = 0; j < descriptorObject.rows; ++j) {
+        if ( matches[j].distance <= max( 2*minDist, 0.02 ) )
+            goodMatches.push_back(matches[j]);
+    }
+
+    return goodMatches;
+}
+
 int main(int argc, char** argv )
 {
     // load images
@@ -52,56 +100,25 @@ int main(int argc, char** argv )
     cvtColor(imageInput, grayInput, COLOR_BGR2GRAY, 1);
     cvtColor(objectImage, grayObject, COLOR_BGR2GRAY, 1);
 
-
-    // detect keypoints
-    int minHessian = 400;
-
-    SurfFeatureDetector detector( minHessian );
-
     std::vector<KeyPoint> keypointsObject, keypointsImage;
-
-    detector.detect( grayObject, keypointsObject );
-    detector.detect( grayInput, keypointsImage );
-
-    // calculate descriptor
-    SurfDescriptorExtractor extractor;
     Mat descriptorObject, descriptorInput;
 
-    extractor.compute( grayInput, keypointsImage, descriptorInput );
-    extractor.compute( grayObject, keypointsObject, descriptorObject );
+    // find feature
+    findFeature(descriptorObject, keypointsObject, descriptorInput,
+                grayObject, grayInput, keypointsImage);
 
     // find nearest neighbor
-    FlannBasedMatcher matcher;
-    std::vector<DMatch> matches;
-    matcher.match( descriptorObject, descriptorInput, matches);
-
-    double maxDist = 0;
-    double minDist = 100;
-
-    for (int i = 0; i < descriptorInput.rows; ++i) {
-        double dist = matches[i].distance;
-
-        if ( dist < minDist )
-            minDist = dist;
-
-        if ( dist > maxDist )
-            maxDist = dist;
-    }
-
-    std::vector< DMatch > goodMatches;
-
-    for (int j = 0; j < descriptorObject.rows; ++j) {
-        if ( matches[j].distance <= max( 2*minDist, 0.02 ) )
-            goodMatches.push_back(matches[j]);
-    }
+    std::vector< DMatch > goodMatches = findNearestNeighbor(descriptorInput,
+                                                            descriptorObject);
 
     if ( goodMatches.size() <= 10 ) {
-        std::cout << "[warn] \t not enough machtings found. exit here!"
+        std::cout << "[WARN] \t not enough machtings found. exit here!"
                   << std::endl;
         exit(0);
     }
 
-    std::cout << "[OK] \t matches found <" << goodMatches.size() << ">" << std::endl;
+    std::cout << "[OK] \t matches found <" << goodMatches.size() << ">"
+              << std::endl;
 
     Mat imageMatches;
     drawMatches( objectImage, keypointsObject, imageInput, keypointsImage,

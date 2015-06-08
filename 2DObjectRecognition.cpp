@@ -95,6 +95,11 @@ int main(int argc, char** argv )
             goodMatches.push_back(matches[j]);
     }
 
+    if ( goodMatches.size() <= 10 ) {
+        std::cout << "[warn] \t not enough machtings found" << std::endl;
+        exit(0);
+    }
+
     std::cout << goodMatches.size() << " # goodMatches " << std::endl;
 
 
@@ -111,9 +116,6 @@ int main(int argc, char** argv )
         obj.push_back( keypointsObject[ goodMatches[k].queryIdx ].pt );
         world.push_back( keypointsImage[ goodMatches[k].trainIdx ].pt );
     }
-
-    std::cout << obj.size() << " Obj size" << std::endl;
-    std::cout << world.size() << " World size" << std::endl;
 
     Mat H = findHomography( obj, world, CV_RANSAC );
     std::vector<Point2f> objCorners(4);

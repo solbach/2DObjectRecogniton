@@ -91,9 +91,12 @@ int main(int argc, char** argv )
     std::vector< DMatch > goodMatches;
 
     for (int j = 0; j < descriptorObject.rows; ++j) {
-        if ( matches[j].distance < 3*minDist )
+        if ( matches[j].distance <= max( 2*minDist, 0.02 ) )
             goodMatches.push_back(matches[j]);
     }
+
+    std::cout << goodMatches.size() << " # goodMatches " << std::endl;
+
 
     Mat imageMatches;
     drawMatches( objectImage, keypointsObject, imageInput, keypointsImage,

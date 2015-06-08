@@ -96,12 +96,12 @@ int main(int argc, char** argv )
     }
 
     if ( goodMatches.size() <= 10 ) {
-        std::cout << "[warn] \t not enough machtings found" << std::endl;
+        std::cout << "[warn] \t not enough machtings found. exit here!"
+                  << std::endl;
         exit(0);
     }
 
-    std::cout << goodMatches.size() << " # goodMatches " << std::endl;
-
+    std::cout << "[OK] \t matches found <" << goodMatches.size() << ">" << std::endl;
 
     Mat imageMatches;
     drawMatches( objectImage, keypointsObject, imageInput, keypointsImage,
@@ -118,6 +118,10 @@ int main(int argc, char** argv )
     }
 
     Mat H = findHomography( obj, world, CV_RANSAC );
+
+    std::cout << "[OK] \t homography found " << std::endl;
+
+
     std::vector<Point2f> objCorners(4);
     objCorners[0] = cvPoint( 0, 0 );
     objCorners[1] = cvPoint( objectImage.cols, 0 );
@@ -127,6 +131,8 @@ int main(int argc, char** argv )
     std::vector< Point2f > worldCorners(4);
 
     perspectiveTransform( objCorners, worldCorners, H );
+
+    std::cout << "[OK] \t perspective transformation " << std::endl;
 
     line( imageMatches, worldCorners[0] + Point2f( objectImage.cols, 0),
             worldCorners[1] + Point2f( objectImage.cols, 0),
@@ -142,9 +148,13 @@ int main(int argc, char** argv )
             Scalar( 0, 255, 0), 4 );
 
     //-- Show detected matches
-    imshow( "Good Matches & Object detection", imageMatches );
+    imshow( "2D object recognition", imageMatches );
+
+    std::cout << "[OK] \t show results " << std::endl;
 
     waitKey(0);
+
+    std::cout << "[OK] \t terminate" << std::endl;
 
     return 0;
 }

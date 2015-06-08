@@ -63,6 +63,7 @@ std::vector<DMatch> findNearestNeighbor(Mat descriptorInput,
     std::vector< DMatch > goodMatches;
 
     for (int j = 0; j < descriptorObject.rows; ++j) {
+        if ( goodMatches.size() > 20 ) break;
         if ( matches[j].distance <= max( 2*minDist, 0.02 ) )
             goodMatches.push_back(matches[j]);
     }

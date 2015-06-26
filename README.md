@@ -1,5 +1,5 @@
 # 2DObjectRecogniton
-2D object recognition using SIFT-Features and homography.
+2D object recognition using SIFT-Features and homography. Wide parts are taken from the OpenCV tutorial as mentioned in section __literature__. The purpose of this repository is to have and provide a ready to compile code.
 
 ## what it does
 This simple programm matches an image of a given scene with the image of an given object. It tries to find and localize the Object within the scene in a 2D manner and projects the object into the scene.

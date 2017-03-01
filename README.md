@@ -1,4 +1,4 @@
-# 2DObjectRecogniton
+# 2D Object Recogniton
 2D object recognition using SIFT-Features and homography. Wide parts are taken from the OpenCV tutorial as mentioned in section __literature__. The purpose of this repository is to have and provide a ready to compile code.
 
 ## what it does
